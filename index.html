@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon"  href="./Imagenes/descarga.png" >
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            color:#0A3871;
+            background-color: #a7ebe7;
+        }
+        
+        #container {
+            display: flex;
+            height: 100vh;
+        }
+
+        #left-section, #right-section {
+            flex: 1;
+            height: 100%;
+            padding: 20px;
+        }
+
+        textarea, #result {
+            width: 100%;
+            height: 80%;
+            resize: none;
+            margin-bottom: 10px;
+            color: #0A3871;
+        }
+
+        button {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            border-radius: 5px;
+        }
+
+        #encryptButton {
+            background-color: #0A3871; /* Azul */
+        }
+
+        #decryptButton {
+            background-color: #FF0000; /* Rojo */
+        }
+
+        #toggleButton {
+            background-color: #af4ca5; /* lila para el fondo */
+            border: 2px solid #4553a0; /* Borde sólido de color claro */
+            color: #fff;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputTextarea = document.getElementById('inputTextarea');
+            const encryptButton = document.getElementById('encryptButton');
+            const decryptButton = document.getElementById('decryptButton');
+            const resultDiv = document.getElementById('result');
+
+            encryptButton.addEventListener('click', function () {
+                const inputValue = inputTextarea.value;
+
+                // Generar clave y vector de inicialización aleatorios
+                const key = CryptoJS.lib.WordArray.random(128 / 8); // Clave de 128 bits
+                const iv = CryptoJS.lib.WordArray.random(128 / 8); // Vector de inicialización
+
+                // Realizar la encriptación usando AES
+                const encryptedValue = CryptoJS.AES.encrypt(inputValue, key, { iv: iv });
+
+                // Mostrar el resultado
+                resultDiv.textContent = `Texto cifrado: ${encryptedValue.toString()}`;
+
+                // Almacenar la clave y el IV en el local storage para su uso posterior
+                localStorage.setItem('encryptionKey', key.toString(CryptoJS.enc.Base64));
+                localStorage.setItem('encryptionIV', iv.toString(CryptoJS.enc.Base64));
+            });
+
+            decryptButton.addEventListener('click', function () {
+                // Recuperar la clave y el IV del local storage
+                const storedKey = localStorage.getItem('encryptionKey');
+                const storedIV = localStorage.getItem('encryptionIV');
+
+                if (!storedKey || !storedIV) {
+                    alert('No hay información de encriptación almacenada.');
+                    return;
+                }
+
+                // Convertir la clave y el IV de Base64 a WordArray
+                const key = CryptoJS.enc.Base64.parse(storedKey);
+                const iv = CryptoJS.enc.Base64.parse(storedIV);
+
+                // Obtener el texto cifrado del resultado mostrado
+                const encryptedText = resultDiv.textContent.replace('Texto cifrado: ', '');
+
+                // Realizar la desencriptación usando AES
+                try {
+                    const decryptedValue = CryptoJS.AES.decrypt(encryptedText, key, { iv: iv });
+                    const decryptedText = CryptoJS.enc.Utf8.stringify(decryptedValue);
+
+                    // Mostrar el resultado
+                    resultDiv.textContent = `Texto descifrado: ${decryptedText}`;
+                } catch (error) {
+                    alert('Error al descifrar. Asegúrate de usar la clave y el vector de inicialización correctos.');
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Encriptacion /Desencriptación</h1>
+    <div id="container">
+        <div id="left-section">
+            <textarea id="inputTextarea" placeholder="Ingrese el texto aqui"></textarea>
+            <button id="encryptButton">Encriptar</button>
+            <button id="decryptButton">Desencriptar</button>
+        </div>
+        <div id="right-section">
+            <div id="result"></div>
+            <img src="Logo.png" alt="Imagen de logo">
+            <img src="Muñeco.png" alt="Imagen del muñeco">
+            <p id="resultText" style="display: none;"></p>
+        </div>
+        <button id="toggleButton" onclick="toggleResult()">Mostrar/Ocultar Resultado</button>
+    </div>
+    <script>
+        function toggleResult() {
+            var resultDiv = document.getElementById('result');
+            var resultText = document.getElementById('resultText');
+
+            if (resultDiv.style.display === 'block' || resultDiv.style.display === '') {
+                resultDiv.style.display = 'none';
+                resultText.innerText = text || '';
+                resultText.style.display = 'block';
+            } else {
+                resultDiv.style.display = 'block';
+                resultText.style.display = 'none';
+            }
+        }    
+    </script>
+</body>
+</html>
+
